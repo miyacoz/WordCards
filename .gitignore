@@ -7,3 +7,4 @@ dist/
 
 # unknown
 src/frontend/index.js
+src/backend/index.js
