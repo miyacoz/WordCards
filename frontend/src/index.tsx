@@ -11,7 +11,7 @@ const fetchOptions: RequestInit = {
   mode: 'cors'
 }
 
-const q = path => fetch(getApiBaseUrl() + path, fetchOptions)
+const q = path => fetch(getApiBaseUrl() + path, fetchOptions).then(r => r.json())
 
 const request = async () => {
   const r = await q('/test')
@@ -20,7 +20,7 @@ const request = async () => {
 
 const App: React.FC = () => (
   <>
-    <h1>hello</h1>
+    <h1>hellooooooooooooooo</h1>
     <button onClick={request}>request</button>
   </>
 )
