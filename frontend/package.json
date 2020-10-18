@@ -1,0 +1,20 @@
+{
+  "name": "wordcards",
+  "scripts": {
+    "fe": "run-p serve typecheck",
+    "serve": "parcel serve ./src/index.htm",
+    "build": "parcel build ./src/index.htm",
+    "typecheck": "tsc ./src/index.tsx --jsx react && echo 'nicely typed ;)'",
+    "ship": "run-p build typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^14.11.10",
+    "npm-run-all": "^4.1.5",
+    "parcel": "^2.0.0-beta.1",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0"
+  }
+}
