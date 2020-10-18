@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "parcel": "^1.12.4"
+  },
+  "dependencies": {
+    "react": "^16.14.0"
   }
 }
