@@ -6,7 +6,3 @@ dist/
 .parcel-cache/
 cert/
 .env
-
-# unknown
-src/frontend/index.js
-src/backend/index.js
