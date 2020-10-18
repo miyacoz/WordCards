@@ -1,4 +1,10 @@
 {
+  "name": "wordcards",
+  "scripts": {
+    "fe": "parcel serve ./src/frontend/index.htm",
+    "build:fe": "parcel build ./src/frontend/index.htm",
+    "build:be": "parcel build ./src/backend/index.ts"
+  },
   "devDependencies": {
     "parcel": "^1.12.4",
     "typescript": "^4.0.3"
