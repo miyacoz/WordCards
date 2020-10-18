@@ -2,19 +2,19 @@
   "name": "wordcards",
   "scripts": {
     "fe": "run-p serve:fe typecheck:fe",
-    "serve:fe": "parcel serve ./src/frontend/index.htm",
+    "serve:fe": "parcel serve ./src/frontend/index.htm --dist-dir ./dist/frontend --cache-dir ./.parcel-cache",
     "ship": "run-p make:*",
     "make:fe": "run-p build:fe typecheck:fe",
     "make:be": "run-p build:be typecheck:be",
-    "build:fe": "parcel build ./src/frontend/index.htm",
-    "build:be": "parcel build ./src/backend/index.ts",
-    "typecheck:fe": "tsc ./src/frontend/index.tsx --jsx react && echo 'nicely typed ;)'",
-    "typecheck:be": "tsc ./src/backend/index.ts && echo 'nicely typed ;)'"
+    "build:fe": "parcel build ./src/frontend/index.htm --dist-dir ./dist/frontend --cache-dir ./.parcel-cache",
+    "build:be": "parcel build ./src/backend/index.ts --dist-dir ./dist/backend --cache-dir ./.parcel-cache",
+    "typecheck:fe": "tsc ./src/frontend/index.tsx --jsx react && echo 'FE nicely typed ;)'",
+    "typecheck:be": "tsc ./src/backend/index.ts && echo 'BE nicely typed ;)'"
   },
   "devDependencies": {
     "@types/node": "^14.11.10",
     "npm-run-all": "^4.1.5",
-    "parcel": "^1.12.4",
+    "parcel": "^2.0.0-beta.1",
     "typescript": "^4.0.3"
   },
   "dependencies": {
