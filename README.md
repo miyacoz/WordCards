@@ -1,10 +1,10 @@
 ### development
 #### frontend
 
-`$ cd frontend`
+`$ cd frontend`  
 `$ yarn fe`
 
 #### backend
 
-`$ cd backend`
+`$ cd backend`  
 `$ yarn be`
