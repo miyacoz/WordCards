@@ -1,6 +1,28 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-const App: React.FC = () => <div>hello</div>
+const getApiBaseUrl = (): string => 'https://' + (
+  process.env.NODE_ENV === 'development'
+  ? 'localhost:8888'
+  : 'dat.zeppel.net/wordcards'
+) + '/api'
+
+const fetchOptions: RequestInit = {
+  mode: 'cors'
+}
+
+const q = path => fetch(getApiBaseUrl() + path, fetchOptions)
+
+const request = async () => {
+  const r = await q('/test')
+  console.log(r)
+}
+
+const App: React.FC = () => (
+  <>
+    <h1>hello</h1>
+    <button onClick={request}>request</button>
+  </>
+)
 
 ReactDOM.render(<App />, document.getElementById('app'))

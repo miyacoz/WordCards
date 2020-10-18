@@ -4,6 +4,8 @@ node_modules/
 .cache/
 dist/
 .parcel-cache/
+cert/
+.env
 
 # unknown
 src/frontend/index.js
