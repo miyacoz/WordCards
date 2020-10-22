@@ -24,3 +24,5 @@ Ctrl-c
 or to stop it from another terminal:  
 `$ docker-compose stop`
 
+to see Mongo Express the console screen:
+http://localhost:8081/
