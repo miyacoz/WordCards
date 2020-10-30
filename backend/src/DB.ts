@@ -10,7 +10,7 @@ export default class DB {
 
   private DB_NAME: string = 'wordcards'
 
-  public constructor(config: DotenvParseOutput) {
+  public constructor(config: Readonly<DotenvParseOutput>) {
     this.config = config
     this.DB_URL = `mongodb://${config.MONGO_HOST || ''}:${config.MONGO_PORT || 0}/`
     this.connect()
