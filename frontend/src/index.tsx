@@ -30,7 +30,9 @@ class HttpRequest {
       {
         ...fetchOptions,
         method,
-        body: JSON.stringify(data),
+        ...([HttpMethod.POST, HttpMethod.PUT].includes(method) ? {
+          body: JSON.stringify(data),
+        } : {})
       }
     )
       .then(r =>
@@ -55,7 +57,21 @@ class HttpRequest {
 const App: React.FC = () => {
   const [data, setData] = React.useState('')
 
-  const request = async () => {
+  React.useEffect(() => {
+    const readAll = async () => {
+      setData('waiting...')
+
+      const r = await new HttpRequest().read('/readAll')
+
+      setData(r)
+    }
+
+    readAll()
+  }, [])
+
+  const create = async () => {
+    setData('waiting...')
+
     const r = await new HttpRequest().create('/create', {
       lang: 'fr',
       lemma: 'vraiment',
@@ -82,7 +98,7 @@ const App: React.FC = () => {
   return (
     <>
       <h1>hellooooooooooooooo</h1>
-      <button onClick={request}>request</button>
+      <button onClick={create}>create</button>
       <div>{JSON.stringify(data)}</div>
     </>
   )
