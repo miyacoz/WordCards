@@ -1,31 +1,16 @@
-import {
-  config as DotenvConfig,
-  DotenvConfigOutput,
-  DotenvParseOutput,
-} from 'dotenv'
 import * as Fs from 'fs'
 import * as Http from 'http'
 import * as Https from 'https'
 
+import Config from './Config'
 import DB from './DB'
 
-const dotenvResult: DotenvConfigOutput = DotenvConfig()
-if (dotenvResult.error) {
-  throw dotenvResult.error
-}
-
-const config: DotenvParseOutput | undefined = dotenvResult.parsed
-
-if (!config) {
-  throw new Error('no config found')
-}
-
 const serverOptions: Https.ServerOptions = {
-  key: Fs.readFileSync(config?.SSL_KEY || ''),
-  cert: Fs.readFileSync(config?.SSL_CERT || '')
+  key: Fs.readFileSync(Config.SSL_KEY || ''),
+  cert: Fs.readFileSync(Config.SSL_CERT || '')
 }
 
-const SERVER_PORT: number = Number(config?.SERVER_PORT) || 0
+const SERVER_PORT: number = Number(Config.SERVER_PORT) || 0
 
 const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerResponse): void => {
   q.on('data', chunk => {
@@ -51,6 +36,6 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
   r.end()
 }
 
-new DB(config)
+new DB(Config)
 Https.createServer(serverOptions, routes).listen(SERVER_PORT)
 console.info('i\'m running now')
