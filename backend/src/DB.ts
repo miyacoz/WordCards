@@ -16,7 +16,7 @@ export default class DB {
     this.connect()
   }
 
-  public connect = async (): Promise<void> => {
+  private connect = async (): Promise<void> => {
     try {
       const client: MongoClient = await MongoClient.connect(this.DB_URL, {
         useUnifiedTopology: true,
