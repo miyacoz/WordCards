@@ -1,20 +1,57 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
+const isDevelopment = process.env.NODE_ENV === 'development'
+
 const getApiBaseUrl = (): string => 'https://' + (
-  process.env.NODE_ENV === 'development'
+  isDevelopment
   ? 'localhost:8888'
   : 'dat.zeppel.net/wordcards'
 ) + '/api'
 
 const fetchOptions: RequestInit = {
-  mode: 'cors'
+  mode: isDevelopment ? 'cors' : 'same-origin'
 }
 
-const q = path => fetch(getApiBaseUrl() + path, fetchOptions).then(r => r.json())
+enum HttpMethod {
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  DELETE = 'DELETE',
+}
+
+class HttpRequest {
+  private q = (method: HttpMethod, path: string, data: object = {}): object | null =>
+    fetch(
+      getApiBaseUrl() + path,
+      {
+        ...fetchOptions,
+        method,
+        ...data
+      }
+    )
+      .then(r =>
+        {
+          try {
+            console.log(r)
+            return r.json()
+          } catch (_) {
+            return null
+          }
+        }
+      )
+
+  public read = (path: string, data: object = {}) => this.q(HttpMethod.GET, path, data)
+
+  public create = (path: string, data: object) => this.q(HttpMethod.POST, path, data)
+
+  public update = (path: string, data: object) => this.q(HttpMethod.PUT, path, data)
+
+  public delete = (path: string) => this.q(HttpMethod.DELETE, path)
+}
 
 const request = async () => {
-  const r = await q('/test')
+  const r = await new HttpRequest().read('/test')
   console.log(r)
 }
 
