@@ -2,19 +2,28 @@ import { DotenvParseOutput } from 'dotenv'
 import {
   MongoClient,
   Db as MongoDb,
-  Collection as MongoCollection,
 } from 'mongodb'
 
-export default class DB {
-  private db: MongoDb | null = null
+interface Word {
+  _id: string
+  lang: string
+  lemma: string
+  words: any[]
+  tags: string
+}
 
-  private collection: MongoCollection | null = null
+import Config from './Config'
+
+class DB {
+  private db: MongoDb | null = null
 
   private config: DotenvParseOutput
 
   private DB_URL: string
 
   private DB_NAME: string = 'wordcards'
+
+  private COLLECTION_NAME: string = 'words'
 
   public constructor(config: Readonly<DotenvParseOutput>) {
     this.config = config
@@ -32,8 +41,6 @@ export default class DB {
         }
       })
 
-      console.info('mongo ok')
-
       this.db = client.db(this.DB_NAME)
 
       const collections: { name: string; type: string }[] = await this.db.listCollections({}, {
@@ -41,20 +48,20 @@ export default class DB {
       }).toArray()
       const collectionNames: string[] = collections.map(v => v.name)
 
-      if (!collectionNames.includes('words')) {
-        this.db.createCollection('words').then(() => {
-          console.info('collection created')
-        })
+      if (!collectionNames.includes(this.COLLECTION_NAME)) {
+        this.db.createCollection(this.COLLECTION_NAME)
       }
-
-      this.collection = this.db.collection(this.DB_NAME)
     } catch (e) {
       console.warn(e)
     }
   }
 
-  public create = async (data: object) => {
-    const r = await this.collection?.insertOne(data)
-    console.log(r)
+  public create = async (data: object): Promise<Word | null> => {
+    const r = await this.db?.collection(this.COLLECTION_NAME)?.insertOne(data)
+    return r?.ops[0] || null
   }
 }
+
+const db = new DB(Config)
+
+export default db

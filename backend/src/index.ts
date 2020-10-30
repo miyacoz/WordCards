@@ -11,31 +11,49 @@ const serverOptions: Https.ServerOptions = {
 }
 
 const SERVER_PORT: number = Number(Config.SERVER_PORT) || 0
+const API_PREFIX: string = 'api'
 
 const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerResponse): void => {
-  q.on('data', chunk => {
-    console.log(JSON.parse(chunk.toString()))
-  })
-
   const headers: Http.OutgoingHttpHeaders = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   }
-  r.writeHead(200, headers)
 
-  const now = new Date()
-  const data = {
-    data: {
-      it: 'good'
-    },
-    now
+  const empty = Buffer.alloc(0)
+
+  q.on('data', async chunk => {
+    const pathAndParams = q.url?.split('?')
+    const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
+
+    if (q.method?.toLowerCase() === 'post' && paths[0] === 'create') {
+      try {
+        const data = JSON.parse(chunk.toString())
+
+        try {
+          const record = await DB.create(data)
+          r.writeHead(200, headers)
+          r.write(JSON.stringify(record))
+          r.end()
+        } catch (e) {
+          console.warn('data could not be created')
+        }
+      } catch (e) {
+        console.warn('request data parse failed')
+      }
+    } else {
+      r.writeHead(400, headers)
+      r.write(empty)
+      r.end()
+    }
+  })
+
+  if (q.method?.toLowerCase() === 'options') {
+    r.writeHead(204, headers)
+    r.write(empty)
+    r.end()
   }
-  r.write(Number(now) % 2 ? JSON.stringify(data) : '[]')
-  r.end()
 }
 
-new DB(Config)
 Https.createServer(serverOptions, routes).listen(SERVER_PORT)
-console.info('i\'m running now')

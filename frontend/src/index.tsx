@@ -36,7 +36,6 @@ class HttpRequest {
       .then(r =>
         {
           try {
-            console.log(r)
             return r.json()
           } catch (_) {
             return null
@@ -53,34 +52,40 @@ class HttpRequest {
   public delete = (path: string) => this.q(HttpMethod.DELETE, path)
 }
 
-const request = async () => {
-  const r = await new HttpRequest().create('/test', {
-    lang: 'fr',
-    lemma: 'vraiment',
-    words: [
-      {
-        class: 'adverb',
-        meanings: '1. trully, really, genuinely\n1. really, very',
-        examples: '1. Elle est vraiment belle.\n  - She is really beautiful.',
-        memo: '',
-      },
-      {
-        class: 'interjection',
-        meanings: '1. really? for real?',
-        examples: '',
-        memo: '',
-      },
-    ],
-    tags: [],
-  })
-  console.log(r)
-}
+const App: React.FC = () => {
+  const [data, setData] = React.useState('')
 
-const App: React.FC = () => (
-  <>
-    <h1>hellooooooooooooooo</h1>
-    <button onClick={request}>request</button>
-  </>
-)
+  const request = async () => {
+    const r = await new HttpRequest().create('/create', {
+      lang: 'fr',
+      lemma: 'vraiment',
+      words: [
+        {
+          class: 'adverb',
+          meanings: '1. trully, really, genuinely\n1. really, very',
+          examples: '1. Elle est vraiment belle.\n  - She is really beautiful.',
+          memo: '',
+        },
+        {
+          class: 'interjection',
+          meanings: '1. really? for real?',
+          examples: '',
+          memo: '',
+        },
+      ],
+      tags: [],
+    })
+
+    setData(r)
+  }
+
+  return (
+    <>
+      <h1>hellooooooooooooooo</h1>
+      <button onClick={request}>request</button>
+      <div>{JSON.stringify(data)}</div>
+    </>
+  )
+}
 
 ReactDOM.render(<App />, document.getElementById('app'))
