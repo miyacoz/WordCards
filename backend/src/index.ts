@@ -2,7 +2,6 @@ import * as Https from 'https'
 import { config as DotenvConfig, DotenvConfigOutput, DotenvParseOutput } from 'dotenv'
 import * as Fs from 'fs'
 import * as Http from 'http'
-// import * as HttpProxy from 'http-proxy'
 
 import DB from './DB'
 
@@ -23,10 +22,6 @@ const serverOptions: Https.ServerOptions = {
 }
 
 const SERVER_PORT: number = Number(config?.SERVER_PORT) || 0
-
-if (config) {
-  new DB(config)
-}
 
 const routes: Http.RequestListener = (q, r): void => {
   q.on('readable', () => {
@@ -54,5 +49,6 @@ const routes: Http.RequestListener = (q, r): void => {
   r.end()
 }
 
+new DB(config)
 Https.createServer(serverOptions, routes).listen(SERVER_PORT)
 console.info('i\'m running now')
