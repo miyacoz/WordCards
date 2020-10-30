@@ -21,33 +21,49 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
     'Access-Control-Allow-Headers': 'Content-Type',
   }
 
+  const pathAndParams = q.url?.split('?')
+  const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
+  const method = q.method?.toLowerCase()
+  const verb = paths[0]
+  console.log(`method: ${method}, verb: ${verb}`)
+
   const empty = Buffer.alloc(0)
 
-  q.on('data', async chunk => {
-    const pathAndParams = q.url?.split('?')
-    const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
-
-    if (q.method?.toLowerCase() === 'post' && paths[0] === 'create') {
-      try {
-        const data = JSON.parse(chunk.toString())
-
+  q
+    .on('data', async chunk => {
+      if (method === 'post' && verb === 'create') {
         try {
-          const record = await DB.create(data)
+          const data = JSON.parse(chunk.toString())
+
+          try {
+            const record = await DB.create(data)
+            r.writeHead(200, headers)
+            r.write(JSON.stringify(record))
+            r.end()
+          } catch (e) {
+            console.warn('data could not be created')
+          }
+        } catch (e) {
+          console.warn('request data parse failed')
+        }
+      } else {
+        r.writeHead(400, headers)
+        r.write(empty)
+        r.end()
+      }
+    })
+    .on('end', async () => {
+      if (method === 'get' && verb === 'readAll') {
+        try {
+          const records = await DB.readAll()
           r.writeHead(200, headers)
-          r.write(JSON.stringify(record))
+          r.write(JSON.stringify(records))
           r.end()
         } catch (e) {
-          console.warn('data could not be created')
+          console.warn('data could not be retrieved')
         }
-      } catch (e) {
-        console.warn('request data parse failed')
       }
-    } else {
-      r.writeHead(400, headers)
-      r.write(empty)
-      r.end()
-    }
-  })
+    })
 
   if (q.method?.toLowerCase() === 'options') {
     r.writeHead(204, headers)

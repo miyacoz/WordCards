@@ -56,9 +56,16 @@ class DB {
     }
   }
 
+  private query = () => this.db?.collection(this.COLLECTION_NAME)
+
   public create = async (data: object): Promise<Word | {}> => {
-    const r = await this.db?.collection(this.COLLECTION_NAME)?.insertOne(data)
+    const r = await this.query()?.insertOne(data)
     return r?.ops[0] || {}
+  }
+
+  public readAll = async (): Promise<Word[]> => {
+    const r = await this.query()?.find().toArray()
+    return r || []
   }
 }
 
