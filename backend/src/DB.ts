@@ -1,8 +1,14 @@
 import { DotenvParseOutput } from 'dotenv'
-import { MongoClient, Db as MongoDb } from 'mongodb'
+import {
+  MongoClient,
+  Db as MongoDb,
+  Collection as MongoCollection,
+} from 'mongodb'
 
 export default class DB {
   private db: MongoDb | null = null
+
+  private collection: MongoCollection | null = null
 
   private config: DotenvParseOutput
 
@@ -40,8 +46,15 @@ export default class DB {
           console.info('collection created')
         })
       }
+
+      this.collection = this.db.collection(this.DB_NAME)
     } catch (e) {
       console.warn(e)
     }
+  }
+
+  public create = async (data: object) => {
+    const r = await this.collection?.insertOne(data)
+    console.log(r)
   }
 }
