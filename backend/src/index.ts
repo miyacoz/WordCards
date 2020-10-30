@@ -1,16 +1,21 @@
 import * as Https from 'https'
-import * as Dotenv from 'dotenv'
+import { config as DotenvConfig, DotenvConfigOutput, DotenvParseOutput } from 'dotenv'
 import * as Fs from 'fs'
 import * as Http from 'http'
 // import * as HttpProxy from 'http-proxy'
 import { MongoClient, Db as MongoDb } from 'mongodb'
 
-const dotenvResult: Dotenv.DotenvConfigOutput = Dotenv.config()
+const dotenvResult: DotenvConfigOutput = DotenvConfig()
 if (dotenvResult.error) {
   throw dotenvResult.error
 }
 
-const config = dotenvResult.parsed
+const config: DotenvParseOutput | undefined = dotenvResult.parsed
+
+if (!config) {
+  throw new Error('no config found')
+}
+
 const serverOptions: Https.ServerOptions = {
   key: Fs.readFileSync(config?.SSL_KEY || ''),
   cert: Fs.readFileSync(config?.SSL_CERT || '')
@@ -18,38 +23,52 @@ const serverOptions: Https.ServerOptions = {
 
 const SERVER_PORT: number = Number(config?.SERVER_PORT) || 0
 
-const DB_URL: string = `mongodb://${config?.MONGO_HOST || ''}:${config?.MONGO_PORT || 0}/`
-const DB_NAME: string = 'wordcards'
+class DB {
+  private db: MongoDb | null = null
 
-let db: MongoDb;
+  private config: DotenvParseOutput
 
-const connectDb = async (): Promise<void> => {
-  try {
-    const client: MongoClient = await MongoClient.connect(DB_URL, {
-      useUnifiedTopology: true,
-      auth: {
-        user: config?.MONGO_USER || '',
-        password: config?.MONGO_PASS || '',
-      }
-    })
-      
-    console.info('mongo ok')
+  private DB_URL: string
 
-    db = client.db(DB_NAME)
+  private DB_NAME: string = 'wordcards'
 
-    const collections: { name: string; type: string }[] = await db.listCollections({}, {
-      nameOnly: true,
-    }).toArray()
-    const collectionNames: string[] = collections.map(v => v.name)
-
-    if (!collectionNames.includes('words')) {
-      db.createCollection('words').then(() => {
-        console.info('collection created')
-      })
-    }
-  } catch (e) {
-    console.warn(e)
+  public constructor(config: DotenvParseOutput) {
+    this.config = config
+    this.DB_URL = `mongodb://${config.MONGO_HOST || ''}:${config.MONGO_PORT || 0}/`
+    this.connect()
   }
+
+  public connect = async (): Promise<void> => {
+    try {
+      const client: MongoClient = await MongoClient.connect(this.DB_URL, {
+        useUnifiedTopology: true,
+        auth: {
+          user: this.config.MONGO_USER || '',
+          password: this.config.MONGO_PASS || '',
+        }
+      })
+        
+      console.info('mongo ok')
+
+      this.db = client.db(this.DB_NAME)
+
+      const collections: { name: string; type: string }[] = await this.db.listCollections({}, {
+        nameOnly: true,
+      }).toArray()
+      const collectionNames: string[] = collections.map(v => v.name)
+
+      if (!collectionNames.includes('words')) {
+        this.db.createCollection('words').then(() => {
+          console.info('collection created')
+        })
+      }
+    } catch (e) {
+      console.warn(e)
+    }
+  }
+}
+if (config) {
+  new DB(config)
 }
 
 const routes: Http.RequestListener = (q, r): void => {
@@ -78,6 +97,5 @@ const routes: Http.RequestListener = (q, r): void => {
   r.end()
 }
 
-connectDb()
 Https.createServer(serverOptions, routes).listen(SERVER_PORT)
 console.info('i\'m running now')
