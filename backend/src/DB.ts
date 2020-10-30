@@ -56,9 +56,9 @@ class DB {
     }
   }
 
-  public create = async (data: object): Promise<Word | null> => {
+  public create = async (data: object): Promise<Word | {}> => {
     const r = await this.db?.collection(this.COLLECTION_NAME)?.insertOne(data)
-    return r?.ops[0] || null
+    return r?.ops[0] || {}
   }
 }
 
