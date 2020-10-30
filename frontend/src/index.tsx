@@ -10,7 +10,10 @@ const getApiBaseUrl = (): string => 'https://' + (
 ) + '/api'
 
 const fetchOptions: RequestInit = {
-  mode: isDevelopment ? 'cors' : 'same-origin'
+  mode: isDevelopment ? 'cors' : 'same-origin',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 }
 
 enum HttpMethod {
@@ -27,7 +30,7 @@ class HttpRequest {
       {
         ...fetchOptions,
         method,
-        ...data
+        body: JSON.stringify(data),
       }
     )
       .then(r =>
@@ -51,7 +54,25 @@ class HttpRequest {
 }
 
 const request = async () => {
-  const r = await new HttpRequest().read('/test')
+  const r = await new HttpRequest().create('/test', {
+    lang: 'fr',
+    lemma: 'vraiment',
+    words: [
+      {
+        class: 'adverb',
+        meanings: '1. trully, really, genuinely\n1. really, very',
+        examples: '1. Elle est vraiment belle.\n  - She is really beautiful.',
+        memo: '',
+      },
+      {
+        class: 'interjection',
+        meanings: '1. really? for real?',
+        examples: '',
+        memo: '',
+      },
+    ],
+    tags: [],
+  })
   console.log(r)
 }
 
