@@ -86,7 +86,7 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
       await route(HttpMethod.DELETE, 'delete', ({ params }) => DB.delete(params[0]))
     })
 
-  if (q.method?.toLowerCase() === 'options') {
+  if (q.method?.toLowerCase() === HttpMethod.OPTIONS) {
     send(204)
   }
 }
