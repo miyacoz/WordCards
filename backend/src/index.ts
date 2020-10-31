@@ -21,18 +21,20 @@ enum HttpMethod {
   OPTIONS = 'options',
 }
 
-const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerResponse): void => {
-  const headers: Http.OutgoingHttpHeaders = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  }
+const headers: Http.OutgoingHttpHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
 
+const empty = Buffer.alloc(0)
+
+const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerResponse): void => {
   const send = (code: number, data?: object): void => {
     const isDataEmpty = typeof data === 'undefined'
     r.writeHead(code, headers)
-    r.write(isDataEmpty ? Buffer.alloc(0) : JSON.stringify(data))
+    r.write(isDataEmpty ? empty : JSON.stringify(data))
     r.end()
   }
 
@@ -40,7 +42,7 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
     routeMethod: HttpMethod,
     routeVerb: string,
     routeAction: ({ params, data }: { params: string[]; data: object }) => Promise<any>,
-    parsedData?: object,
+    parsedData: object = {},
   ): Promise<any> => {
     const pathAndParams = q.url?.split('?')
     const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
@@ -50,13 +52,7 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
 
     if (method === routeMethod && verb === routeVerb) {
       try {
-        let result: object
-        if (parsedData) {
-          result = await routeAction({ params, data: parsedData })
-        } else {
-          // `data` won't be used
-          result = await routeAction({ params, data: {} })
-        }
+        const result = await routeAction({ params, data: parsedData })
 
         const code = typeof result === 'undefined'
           ? 204
