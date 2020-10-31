@@ -72,6 +72,7 @@ class DB {
   }
 
   public create = async (data: object): Promise<Word | {}> => {
+    // TODO duplication check
     // TODO should wrap it with try-catch?
     const r = await this.query()?.insertOne(data)
     if (!r?.result.ok) {
