@@ -13,6 +13,14 @@ const serverOptions: Https.ServerOptions = {
 const SERVER_PORT: number = Number(Config.SERVER_PORT) || 0
 const API_PREFIX: string = 'api'
 
+enum HttpMethod {
+  GET = 'get',
+  POST = 'post',
+  PUT = 'put',
+  DELETE = 'delete',
+  OPTIONS = 'options',
+}
+
 const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerResponse): void => {
   const headers: Http.OutgoingHttpHeaders = {
     'Content-Type': 'application/json',
@@ -21,54 +29,65 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
     'Access-Control-Allow-Headers': 'Content-Type',
   }
 
-  const pathAndParams = q.url?.split('?')
-  const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
-  const method = q.method?.toLowerCase()
-  const verb = paths.shift()
-  console.log(`method: ${method}, verb: ${verb}`)
+  const send = (code: number, data?: object): void => {
+    const isDataEmpty = typeof data === 'undefined'
+    r.writeHead(code, headers)
+    r.write(isDataEmpty ? Buffer.alloc(0) : JSON.stringify(data))
+    r.end()
+  }
 
-  const empty = Buffer.alloc(0)
+  const route = async (
+    routeMethod: HttpMethod,
+    routeVerb: string,
+    routeAction: ({ params, data }: { params?: string[]; data: object }) => Promise<any>,
+    parsedData?: object,
+  ): Promise<any> => {
+    const pathAndParams = q.url?.split('?')
+    const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
+    const verb = paths.shift()
+    const params = paths
+    const method = q.method?.toLowerCase()
+
+    if (method === routeMethod && verb === routeVerb) {
+      try {
+        let result: object
+        if (parsedData) {
+          result = await routeAction({ params, data: parsedData })
+        } else {
+          // `data` won't be used
+          result = await routeAction({ params, data: {} })
+        }
+
+        const code = typeof result === 'undefined'
+          ? 204
+          : method === HttpMethod.PUT
+          ? 201
+          : 200
+
+        send(code , result)
+      } catch (e) {
+        console.warn('data process failed', e)
+        // TODO return error 4xx/5xx
+        send(500)
+      }
+    }
+  }
 
   q
     .on('data', async chunk => {
-      if (method === 'post' && verb === 'create') {
-        try {
-          const data = JSON.parse(chunk.toString())
-
-          try {
-            const record = await DB.create(data)
-            r.writeHead(200, headers)
-            r.write(JSON.stringify(record))
-            r.end()
-          } catch (e) {
-            console.warn('data could not be created')
-          }
-        } catch (e) {
-          console.warn('request data parse failed')
-        }
-      } else {
-        r.writeHead(400, headers)
-        r.write(empty)
-        r.end()
+      try {
+        await route(HttpMethod.POST, 'create', ({ data }) => DB.create(data), JSON.parse(chunk.toString()))
+      } catch (e) {
+        // TODO return 4xx/5xx
+        console.warn('request data parse failed', e)
       }
     })
     .on('end', async () => {
-      if (method === 'get' && verb === 'readAll') {
-        try {
-          const records = await DB.readAll()
-          r.writeHead(200, headers)
-          r.write(JSON.stringify(records))
-          r.end()
-        } catch (e) {
-          console.warn('data could not be retrieved')
-        }
-      }
+      await route(HttpMethod.GET, 'readAll', () => DB.readAll())
     })
 
   if (q.method?.toLowerCase() === 'options') {
-    r.writeHead(204, headers)
-    r.write(empty)
-    r.end()
+    send(204)
   }
 }
 
