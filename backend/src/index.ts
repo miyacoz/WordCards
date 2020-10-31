@@ -39,7 +39,7 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
   const route = async (
     routeMethod: HttpMethod,
     routeVerb: string,
-    routeAction: ({ params, data }: { params?: string[]; data: object }) => Promise<any>,
+    routeAction: ({ params, data }: { params: string[]; data: object }) => Promise<any>,
     parsedData?: object,
   ): Promise<any> => {
     const pathAndParams = q.url?.split('?')
@@ -76,7 +76,9 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
   q
     .on('data', async chunk => {
       try {
-        await route(HttpMethod.POST, 'create', ({ data }) => DB.create(data), JSON.parse(chunk.toString()))
+        const parsedData = JSON.parse(chunk.toString())
+        await route(HttpMethod.POST, 'create', ({ data }) => DB.create(data), parsedData)
+        await route(HttpMethod.PUT, 'update', ({ params, data }) => DB.update(params[0], data), parsedData)
       } catch (e) {
         // TODO return 4xx/5xx
         console.warn('request data parse failed', e)
@@ -84,6 +86,8 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
     })
     .on('end', async () => {
       await route(HttpMethod.GET, 'readAll', () => DB.readAll())
+      await route(HttpMethod.GET, 'read', ({ params }) => DB.read(params[0]))
+      await route(HttpMethod.DELETE, 'delete', ({ params }) => DB.delete(params[0]))
     })
 
   if (q.method?.toLowerCase() === 'options') {
