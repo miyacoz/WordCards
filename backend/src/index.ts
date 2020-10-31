@@ -38,18 +38,22 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
     r.end()
   }
 
+  const pathAndParams = q.url?.split('?')
+  const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
+  const verb = paths.shift()
+  const params = paths
+  const method = q.method?.toLowerCase()
+
+  if (method === HttpMethod.OPTIONS) {
+    send(204)
+  }
+
   const route = async (
     routeMethod: HttpMethod,
     routeVerb: string,
     routeAction: ({ params, data }: { params: string[]; data: object }) => Promise<any>,
     parsedData: object = {},
   ): Promise<any> => {
-    const pathAndParams = q.url?.split('?')
-    const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
-    const verb = paths.shift()
-    const params = paths
-    const method = q.method?.toLowerCase()
-
     if (method === routeMethod && verb === routeVerb) {
       try {
         const result = await routeAction({ params, data: parsedData })
@@ -85,10 +89,6 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
       await route(HttpMethod.GET, 'read', ({ params }) => DB.read(params[0]))
       await route(HttpMethod.DELETE, 'delete', ({ params }) => DB.delete(params[0]))
     })
-
-  if (q.method?.toLowerCase() === HttpMethod.OPTIONS) {
-    send(204)
-  }
 }
 
 Https.createServer(serverOptions, routes).listen(SERVER_PORT)
