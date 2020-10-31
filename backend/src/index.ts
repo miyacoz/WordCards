@@ -24,7 +24,7 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
   const pathAndParams = q.url?.split('?')
   const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
   const method = q.method?.toLowerCase()
-  const verb = paths[0]
+  const verb = paths.shift()
   console.log(`method: ${method}, verb: ${verb}`)
 
   const empty = Buffer.alloc(0)
