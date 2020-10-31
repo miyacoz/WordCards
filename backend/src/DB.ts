@@ -4,15 +4,22 @@ import {
   Db as MongoDb,
 } from 'mongodb'
 
-interface Word {
-  _id: string
-  lang: string
-  lemma: string
-  words: any[]
-  tags: string
+import Config from './Config'
+import Word from './Word'
+
+class DBError extends Error {
+  public constructor(message: string) {
+    super(`[DBError] ${message}`)
+    Error.captureStackTrace(this, DBError)
+  }
 }
 
-import Config from './Config'
+class RecordNotFoundError extends Error {
+  public constructor(message: string) {
+    super(`[RecordNotFoundError] ${message}`)
+    Error.captureStackTrace(this, RecordNotFoundError)
+  }
+}
 
 class DB {
   private db: MongoDb | null = null
@@ -56,16 +63,56 @@ class DB {
     }
   }
 
-  private query = () => this.db?.collection(this.COLLECTION_NAME)
+  private query = () => {
+    const collection = this.db?.collection(this.COLLECTION_NAME)
+    if (!collection) {
+      throw new DBError(`collection "${this.COLLECTION_NAME}" was not found`)
+    }
+    return collection
+  }
 
   public create = async (data: object): Promise<Word | {}> => {
+    // TODO should wrap it with try-catch?
     const r = await this.query()?.insertOne(data)
+    if (!r?.result.ok) {
+      throw new DBError('"create" failed')
+    }
     return r?.ops[0] || {}
   }
 
   public readAll = async (): Promise<Word[]> => {
-    const r = await this.query()?.find().toArray()
-    return r || []
+    try {
+      const r = await this.query()?.find().toArray()
+      return r || []
+    } catch (e) {
+      throw new DBError(`"readAll" failed: ${e.message}`)
+    }
+  }
+
+  public read = async (_id: string): Promise<Word> => {
+    // TODO should wrap it with try-catch?
+    const r = await this.query()?.findOne({ query: { _id } })
+    if (!r) {
+      throw new RecordNotFoundError(`record where _id: ${_id} was not found`)
+    }
+    return r
+  }
+
+  public update = async (_id: string, data: object): Promise<Word> => {
+    // TODO should wrap it with try-catch?
+    const r = await this.query()?.findOneAndUpdate({ query: { _id } }, data, { returnOriginal: false })
+    if (!r.ok) {
+      throw new DBError(`"update" for _id: ${_id} failed`)
+    }
+    return r.value
+  }
+
+  public delete = async (_id: string): Promise<void> => {
+    // TODO should wrap it with try-catch?
+    const r = await this.query()?.findOneAndDelete({ query: { _id } })
+    if (!r.ok) {
+      throw new DBError(`"delete" for _id: ${_id} failed`)
+    }
   }
 }
 
