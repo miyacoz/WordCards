@@ -3,7 +3,8 @@ import * as Http from 'http'
 import * as Https from 'https'
 
 import Config from './Config'
-import DB from './DB'
+import HttpMethod from './HttpMethod'
+import Routes from './Routes'
 
 const serverOptions: Https.ServerOptions = {
   key: Fs.readFileSync(Config.SSL_KEY || ''),
@@ -12,14 +13,6 @@ const serverOptions: Https.ServerOptions = {
 
 const SERVER_PORT: number = Number(Config.SERVER_PORT) || 0
 const API_PREFIX: string = 'api'
-
-enum HttpMethod {
-  GET = 'get',
-  POST = 'post',
-  PUT = 'put',
-  DELETE = 'delete',
-  OPTIONS = 'options',
-}
 
 const headers: Http.OutgoingHttpHeaders = {
   'Content-Type': 'application/json',
@@ -30,7 +23,7 @@ const headers: Http.OutgoingHttpHeaders = {
 
 const empty = Buffer.alloc(0)
 
-const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerResponse): void => {
+const requestHandler: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerResponse): void => {
   const send = (code: number, data?: object): void => {
     const isDataEmpty = typeof data === 'undefined'
     r.writeHead(code, headers)
@@ -42,10 +35,10 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
   const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
   const verb = paths.shift()
   const params = paths
-  const method = q.method?.toLowerCase()
+  const method = q.method?.toLowerCase() as HttpMethod
 
-  if (method === HttpMethod.OPTIONS) {
-    send(204)
+  if (!method) {
+    return
   }
 
   const route = async (
@@ -60,7 +53,7 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
 
         const code = typeof result === 'undefined'
           ? 204
-          : method === HttpMethod.PUT
+          : routeMethod === HttpMethod.PUT
           ? 201
           : 200
 
@@ -73,22 +66,24 @@ const routes: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerRes
     }
   }
 
+  const chunks: Array<string | Buffer | null> = [];
+
   q
-    .on('data', async chunk => {
-      try {
-        const parsedData = JSON.parse(chunk.toString())
-        await route(HttpMethod.POST, 'create', ({ data }) => DB.create(data), parsedData)
-        await route(HttpMethod.PUT, 'update', ({ params, data }) => DB.update(params[0], data), parsedData)
-      } catch (e) {
-        // TODO return 4xx/5xx
-        console.warn('request data parse failed', e)
+    .on('data', chunk => chunks.push(chunk))
+    .on('end', () => {
+      if ([HttpMethod.GET, HttpMethod.DELETE].includes(method)) {
+        Routes(route)
+      } else if ([HttpMethod.POST, HttpMethod.PUT].includes(method)) {
+        try {
+          Routes(route, JSON.parse(chunks.join('')))
+        } catch (e) {
+          // TODO return 4xx/5xx
+          console.warn('request data parse failed', e)
+        }
+      } else {
+        send(204)
       }
-    })
-    .on('end', async () => {
-      await route(HttpMethod.GET, 'readAll', () => DB.readAll())
-      await route(HttpMethod.GET, 'read', ({ params }) => DB.read(params[0]))
-      await route(HttpMethod.DELETE, 'delete', ({ params }) => DB.delete(params[0]))
     })
 }
 
-Https.createServer(serverOptions, routes).listen(SERVER_PORT)
+Https.createServer(serverOptions, requestHandler).listen(SERVER_PORT)
