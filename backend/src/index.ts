@@ -72,10 +72,22 @@ const requestHandler: Http.RequestListener = (q: Http.IncomingMessage, r: Http.S
     .on('data', chunk => chunks.push(chunk))
     .on('end', () => {
       if ([String(HttpMethod.GET), String(HttpMethod.DELETE)].includes(method)) {
-        Routes(route)
+        try {
+          Routes(route)
+        } catch (e) {
+          // TODO return 4xx/5xx
+          console.warn('process failed', e)
+        }
       } else if ([String(HttpMethod.POST), String(HttpMethod.PUT)].includes(method)) {
         try {
-          Routes(route, JSON.parse(chunks.join('')))
+          const data = JSON.parse(chunks.join(''))
+
+          try {
+            Routes(route, data)
+          } catch (e) {
+            // TODO return 4xx/5xx
+            console.warn('process failed', e)
+          }
         } catch (e) {
           // TODO return 4xx/5xx
           console.warn('request data parse failed', e)
