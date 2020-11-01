@@ -35,7 +35,7 @@ const requestHandler: Http.RequestListener = (q: Http.IncomingMessage, r: Http.S
   const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
   const verb = paths.shift()
   const params = paths
-  const method = q.method?.toLowerCase() as HttpMethod
+  const method = q.method?.toLowerCase()
 
   if (!method) {
     return
@@ -71,9 +71,9 @@ const requestHandler: Http.RequestListener = (q: Http.IncomingMessage, r: Http.S
   q
     .on('data', chunk => chunks.push(chunk))
     .on('end', () => {
-      if ([HttpMethod.GET, HttpMethod.DELETE].includes(method)) {
+      if ([String(HttpMethod.GET), String(HttpMethod.DELETE)].includes(method)) {
         Routes(route)
-      } else if ([HttpMethod.POST, HttpMethod.PUT].includes(method)) {
+      } else if ([String(HttpMethod.POST), String(HttpMethod.PUT)].includes(method)) {
         try {
           Routes(route, JSON.parse(chunks.join('')))
         } catch (e) {
