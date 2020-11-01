@@ -4,7 +4,7 @@
     "fe": "run-p serve typecheck",
     "serve": "parcel serve ./src/index.htm",
     "build": "parcel build ./src/index.htm",
-    "typecheck": "tsc ./src/index.tsx --jsx react && echo 'nicely typed ;)'",
+    "typecheck": "tsc ./src/index.tsx --jsx react --esModuleInterop && echo 'nicely typed ;)'",
     "ship": "run-p build typecheck"
   },
   "devDependencies": {
@@ -15,6 +15,9 @@
   },
   "dependencies": {
     "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "react-dom": "^16.14.0",
+    "react-markdown": "^5.0.2",
+    "remark-gfm": "^1.0.0",
+    "styled-components": "^5.2.1"
   }
 }

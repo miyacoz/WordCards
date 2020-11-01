@@ -1,6 +1,8 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
+import French from './French'
+
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 const getApiBaseUrl = (): string => 'https://' + (
@@ -38,7 +40,7 @@ class HttpRequest {
       .then(r =>
         {
           try {
-            return r.json()
+            return [200, 201].includes(r.status) ? r.json() : true
           } catch (_) {
             return null
           }
@@ -55,14 +57,16 @@ class HttpRequest {
 }
 
 const App: React.FC = () => {
-  const [data, setData] = React.useState('')
+  const [isTransfering, setIsTransfering] = React.useState(false)
+  const [data, setData] = React.useState([])
 
   React.useEffect(() => {
     const readAll = async () => {
-      setData('waiting...')
+      setIsTransfering(true)
 
       const r = await new HttpRequest().read('/readAll')
 
+      setIsTransfering(false)
       setData(r)
     }
 
@@ -70,7 +74,7 @@ const App: React.FC = () => {
   }, [])
 
   const create = async () => {
-    setData('waiting...')
+    setIsTransfering(true)
 
     const r = await new HttpRequest().create('/create', {
       lang: 'fr',
@@ -92,14 +96,32 @@ const App: React.FC = () => {
       tags: [],
     })
 
-    setData(r)
+    setIsTransfering(false)
+    setData(prevData => [...prevData, r])
+  }
+
+  const remove = (id: string) => async () => {
+    setIsTransfering(true)
+
+    const r = await new HttpRequest().delete(`/delete/${id}`)
+
+    setIsTransfering(false)
+    r && setData(prevData => prevData.filter(lemma => lemma._id !== id))
   }
 
   return (
     <>
       <h1>hellooooooooooooooo</h1>
-      <button onClick={create}>create</button>
-      <div>{JSON.stringify(data)}</div>
+      <button disabled={isTransfering} onClick={create}>create</button>
+      {data.length ? (
+        <>
+          {data.map(lemma => <French.Lemma key={lemma._id} {...lemma} remove={remove} />)}
+        </>
+      ) : isTransfering ? (
+        <div>Loading...</div>
+      ) : (
+        <div>No data!</div>
+      )}
     </>
   )
 }
