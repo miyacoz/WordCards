@@ -111,8 +111,8 @@ const App: React.FC = () => {
 
   return (
     <>
-      <h1>hellooooooooooooooo</h1>
-      <button disabled={isTransfering} onClick={create}>create</button>
+      <h1>Wordcards</h1>
+      <button disabled={isTransfering} onClick={create}>create a new french word "vraiment"</button>
       {data.length ? (
         <>
           {data.map(lemma => <French.Lemma key={lemma._id} {...lemma} remove={remove} />)}
