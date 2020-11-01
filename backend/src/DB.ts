@@ -2,6 +2,7 @@ import { DotenvParseOutput } from 'dotenv'
 import {
   MongoClient,
   Db as MongoDb,
+  ObjectID,
 } from 'mongodb'
 
 import Config from './Config'
@@ -92,7 +93,7 @@ class DB {
 
   public read = async (_id: string): Promise<Word> => {
     // TODO should wrap it with try-catch?
-    const r = await this.query()?.findOne({ query: { _id } })
+    const r = await this.query()?.findOne({ _id: new ObjectID(_id) })
     if (!r) {
       throw new RecordNotFoundError(`record where _id: ${_id} was not found`)
     }
@@ -101,7 +102,7 @@ class DB {
 
   public update = async (_id: string, data: object): Promise<Word> => {
     // TODO should wrap it with try-catch?
-    const r = await this.query()?.findOneAndUpdate({ query: { _id } }, data, { returnOriginal: false })
+    const r = await this.query()?.findOneAndUpdate({ _id: new ObjectID(_id) }, data, { returnOriginal: false })
     if (!r.ok) {
       throw new DBError(`"update" for _id: ${_id} failed`)
     }
@@ -110,7 +111,7 @@ class DB {
 
   public delete = async (_id: string): Promise<void> => {
     // TODO should wrap it with try-catch?
-    const r = await this.query()?.findOneAndDelete({ query: { _id } })
+    const r = await this.query()?.findOneAndDelete({ _id: new ObjectID(_id) })
     if (!r.ok) {
       throw new DBError(`"delete" for _id: ${_id} failed`)
     }
