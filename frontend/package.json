@@ -4,7 +4,7 @@
     "fe": "run-p serve typecheck",
     "serve": "parcel serve ./src/index.htm",
     "build": "parcel build ./src/index.htm",
-    "typecheck": "tsc ./src/index.tsx --jsx react --esModuleInterop && echo 'nicely typed ;)'",
+    "typecheck": "tsc ./src/index.tsx --noEmit --jsx react --esModuleInterop && echo 'nicely typed ;)'",
     "ship": "run-p build typecheck"
   },
   "devDependencies": {

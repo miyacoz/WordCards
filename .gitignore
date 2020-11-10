@@ -6,8 +6,3 @@ dist/
 .parcel-cache/
 cert/
 .env
-
-# unknown
-frontend/src/index.js
-frontend/src/*/index.js
-frontend/src/typings.js
