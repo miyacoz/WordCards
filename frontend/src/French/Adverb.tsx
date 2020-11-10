@@ -4,7 +4,7 @@ import S from 'styled-components'
 import { IWord } from '../typings'
 import Word from '../Word'
 
-type TFrenchAdverb = IWord & { class: 'adverb' }
+export type TFrenchAdverb = IWord & { class: 'adverb' }
 
 const AdverbBox = S.div`
   background-color: #ccf;

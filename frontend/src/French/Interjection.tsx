@@ -4,7 +4,7 @@ import S from 'styled-components'
 import { IWord } from '../typings'
 import Word from '../Word'
 
-type TFrenchInterjection = IWord & { class: 'interjection' }
+export type TFrenchInterjection = IWord & { class: 'interjection' }
 
 const InterjectionBox = S.div`
   background-color: #ffc;

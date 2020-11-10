@@ -3,8 +3,8 @@ import S from 'styled-components'
 
 import { IWord, ILemma } from '../typings'
 import Word from '../Word'
-import Adverb from './Adverb'
-import Interjection from './Interjection'
+import Adverb, { TFrenchAdverb } from './Adverb'
+import Interjection, { TFrenchInterjection } from './Interjection'
 
 type TFrenchWord = TFrenchAdverb | TFrenchInterjection
 

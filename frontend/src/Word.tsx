@@ -4,7 +4,7 @@ import Gfm from 'remark-gfm'
 
 import { IWord } from './typings'
 
-const Word: React.FC = (props: TWord) => (
+const Word: React.FC = (props: IWord) => (
   <dl>
     <dt>Class</dt>
     <dd>{props.class}</dd>
