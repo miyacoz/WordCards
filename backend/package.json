@@ -2,9 +2,9 @@
   "name": "wordcards",
   "scripts": {
     "be": "run-p watch restarter",
-    "watch": "tsc --watch --noEmit --esModuleInterop",
+    "watch": "tsc --watch --esModuleInterop",
     "restarter": "nodemon ./dist/index.js",
-    "build": "tsc --noEmit --esModuleInterop"
+    "build": "tsc --esModuleInterop"
   },
   "devDependencies": {
     "@types/http-proxy": "^1.17.4",
