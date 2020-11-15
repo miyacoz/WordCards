@@ -4,27 +4,32 @@ import Gfm from 'remark-gfm'
 
 import { IWord } from './typings'
 
-const Word: React.FC = (props: IWord) => (
+const Word: React.FC<IWord> = ({
+  class: classe,
+  meanings,
+  examples,
+  memo,
+}) => (
   <dl>
     <dt>Class</dt>
-    <dd>{props.class}</dd>
+    <dd>{classe}</dd>
     <dt>Meanings</dt>
 
     <dd>
-      <MD plugins={[Gfm]} children={props.meanings} />
+      <MD plugins={[Gfm]} children={meanings} />
     </dd>
 
-    {props.examples && <>
+    {examples && <>
       <dt>Examples</dt>
       <dd>
-        <MD plugins={[Gfm]} children={props.examples} />
+        <MD plugins={[Gfm]} children={examples} />
       </dd>
     </>}
 
-    {props.memo && <>
+    {memo && <>
       <dt>Memo</dt>
       <dd>
-        <MD plugins={[Gfm]} children={props.memo} />
+        <MD plugins={[Gfm]} children={memo} />
       </dd>
     </>}
   </dl>
