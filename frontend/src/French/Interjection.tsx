@@ -9,7 +9,7 @@ export type TFrenchInterjection = IWord & { class: 'interjection' }
 const InterjectionBox = S.div`
   background-color: #ffc;
 `
-const Interjection: React.FC = (props: TFrenchInterjection) => (
+const Interjection: React.FC<TFrenchInterjection> = props => (
   <InterjectionBox>
     <Word {...props} />
   </InterjectionBox>

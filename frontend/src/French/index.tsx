@@ -30,7 +30,7 @@ const LemmaTag = styled.a`
   margin-right: 1rem;
 `
 
-const DeleteButton = styled.a`
+const EditButton = styled.a`
   display: inline-block;
   border: solid 1px red;
   border-radius: 5px;
@@ -38,7 +38,12 @@ const DeleteButton = styled.a`
   color: red;
 `
 
-const Lemma: React.FC = (props: TFrenchLemma & { remove: (id: string) => Promise<void> }) => (
+interface ILemmaProps extends TFrenchLemma {
+  remove: (id: string) => Promise<void>
+  edit: (id: string) => () => void
+}
+
+const Lemma: React.FC<ILemmaProps> = props => (
   <Article>
     <LemmaLanguage>French</LemmaLanguage>
     <LemmaWrapper>{props.lemma}</LemmaWrapper>
@@ -52,6 +57,8 @@ const Lemma: React.FC = (props: TFrenchLemma & { remove: (id: string) => Promise
     })}
 
     {props.tags.map(tag => <LemmaTag>{tag}</LemmaTag>)}
+
+    <EditButton onClick={props.edit(props._id)}>Edit</EditButton>
   </Article>
 )
 

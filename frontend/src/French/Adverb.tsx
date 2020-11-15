@@ -9,7 +9,7 @@ export type TFrenchAdverb = IWord & { class: 'adverb' }
 const AdverbBox = S.div`
   background-color: #ccf;
 `
-const Adverb: React.FC = (props: TFrenchAdverb) => (
+const Adverb: React.FC<TFrenchAdverb> = props => (
   <AdverbBox>
     <Word {...props} />
   </AdverbBox>
