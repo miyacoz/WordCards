@@ -5,7 +5,7 @@ export interface IWord {
   memo: string
 }
 
-export interface ILemma<T extends IWord> {
+export interface ILemma<T extends IWord = IWord> {
   _id: string
   lang: string
   lemma: string
