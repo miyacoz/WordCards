@@ -1,5 +1,5 @@
 import * as React from 'react'
-import S from 'styled-components'
+import styled from 'styled-components'
 
 import { IWord, ILemma } from '/typings'
 import Word from '/Word'
@@ -10,27 +10,27 @@ type TFrenchWord = TFrenchAdverb | TFrenchInterjection
 
 type TFrenchLemma = ILemma<TFrenchAdverb | TFrenchInterjection>
 
-const Article = S.div`
+const Article = styled.div`
   margin-bottom: 2rem;
   border-bottom: solid 1px #ccc;
   padding: 1rem;
 `
 
-const LemmaLanguage = S.div`
+const LemmaLanguage = styled.div`
   font-style: oblique;
 `
 
-const LemmaWrapper = S.div`
+const LemmaWrapper = styled.div`
   font-size: 1.5rem;
   font-weight: 900;
   line-height: 2rem;
 `
 
-const LemmaTag = S.a`
+const LemmaTag = styled.a`
   margin-right: 1rem;
 `
 
-const DeleteButton = S.a`
+const DeleteButton = styled.a`
   display: inline-block;
   border: solid 1px red;
   border-radius: 5px;
