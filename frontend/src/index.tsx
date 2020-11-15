@@ -11,8 +11,18 @@ const Main = styled.div`
   display: flex;
 `
 
-const LemmaList = styled.div`
+const LemmaListWrapper = styled.div`
   flex-grow: 1;
+`
+
+const LemmaList = styled.div`
+`
+
+const LemmaListMessage = styled.div`
+  padding: 0.3rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  color: red;
 `
 
 const LemmaLinkWrapper = styled.a`
@@ -57,9 +67,23 @@ const LemmaEdit = styled.div`
   flex-grow: 2
 `
 
+const StyledInput = styled.input`
+  display: block;
+`
+
+interface ISearchLemmaProps {
+  onKeyUp: Function
+}
+
+const SearchLemma: React.FC<ISearchLemmaProps> = ({ onKeyUp }) => (
+  <StyledInput onKeyUp={onKeyUp} placeholder='Search Lemma...' />
+)
+
 const App: React.FC = () => {
   const [isTransfering, setIsTransfering] = React.useState(false)
   const [data, setData] = React.useState([])
+  const [filteredData, setFilteredData] = React.useState([])
+  const [isFiltering, setIsFiltering] = React.useState(false)
   const [currentLemmaView, setCurrentLemmaView] = React.useState(null)
   const [currentLemmaEdit, setCurrentLemmaEdit] = React.useState(null)
 
@@ -67,7 +91,7 @@ const App: React.FC = () => {
     const readAll = async () => {
       setIsTransfering(true)
 
-      const r = await new HttpRequest().read('/readAll')
+      const r: ILemma[] = await new HttpRequest().read('/readAll')
 
       setIsTransfering(false)
       setData(r)
@@ -79,7 +103,7 @@ const App: React.FC = () => {
   const create = async () => {
     setIsTransfering(true)
 
-    const r = await new HttpRequest().create('/create', {
+    const r: ILemma = await new HttpRequest().create('/create', {
       lang: 'fr',
       lemma: 'vraiment',
       words: [
@@ -106,7 +130,7 @@ const App: React.FC = () => {
   const remove = (id: string) => async () => {
     setIsTransfering(true)
 
-    const r = await new HttpRequest().delete(`/delete/${id}`)
+    const r: boolean = await new HttpRequest().delete(`/delete/${id}`)
 
     setIsTransfering(false)
     r && setData(prevData => prevData.filter(lemma => lemma._id !== id))
@@ -123,23 +147,41 @@ const App: React.FC = () => {
     }
   }
 
+  const handleSearch = (event: KeyboardEvent<HTMLInputElement>) => {
+    const query = event.target.value.trim()
+    if (query.length) {
+      setIsFiltering(true)
+      // TODO search all text
+      setFilteredData(data.filter(lemma => new RegExp(query, 'gi').test(lemma)))
+    } else {
+      setIsFiltering(false)
+    }
+  }
+
+  console.log(filteredData, isFiltering)
+  const displayData = isFiltering ? filteredData : data
+
   return (
     <>
       <h1>Wordcards</h1>
       <button disabled={isTransfering} onClick={create}>create a new french word "vraiment"</button>
 
       <Main>
-        <LemmaList>
-          {data.length ? (
-            <>
-              {data.map(lemma => <Lemma key={lemma._id} lemma={lemma} onClick={handleClickLemma} />)}
-            </>
-          ) : isTransfering ? (
-            <div>Loading...</div>
-          ) : (
-            <div>No data!</div>
-          )}
-        </LemmaList>
+        <LemmaListWrapper>
+          <SearchLemma onKeyUp={handleSearch} />
+
+          <LemmaList>
+            {displayData.length ? (
+              <>
+                {displayData.map(lemma => <Lemma key={lemma._id} lemma={lemma} onClick={handleClickLemma} />)}
+              </>
+            ) : isTransfering ? (
+              <LemmaListMessage>Loading...</LemmaListMessage>
+            ) : (
+              <LemmaListMessage>No data!</LemmaListMessage>
+            )}
+          </LemmaList>
+        </LemmaListWrapper>
 
         <LemmaView>
           {currentLemmaView ? (
