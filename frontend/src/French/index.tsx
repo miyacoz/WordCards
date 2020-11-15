@@ -52,8 +52,6 @@ const Lemma: React.FC = (props: TFrenchLemma & { remove: (id: string) => Promise
     })}
 
     {props.tags.map(tag => <LemmaTag>{tag}</LemmaTag>)}
-
-    <DeleteButton onClick={props.remove(props._id)}>Delete Lemma</DeleteButton>
   </Article>
 )
 
