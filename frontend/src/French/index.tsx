@@ -1,17 +1,17 @@
 import * as React from 'react'
 import S from 'styled-components'
 
-import { IWord, ILemma } from '../typings'
-import Word from '../Word'
-import Adverb, { TFrenchAdverb } from './Adverb'
-import Interjection, { TFrenchInterjection } from './Interjection'
+import { IWord, ILemma } from '/typings'
+import Word from '/Word'
+import Adverb, { TFrenchAdverb } from '/French/Adverb'
+import Interjection, { TFrenchInterjection } from '/French/Interjection'
 
 type TFrenchWord = TFrenchAdverb | TFrenchInterjection
 
 type TFrenchLemma = ILemma<TFrenchAdverb | TFrenchInterjection>
 
 const Article = S.div`
-  margin: 2rem 0;
+  margin-bottom: 2rem;
   border-bottom: solid 1px #ccc;
   padding: 1rem;
 `
@@ -53,7 +53,7 @@ const Lemma: React.FC = (props: TFrenchLemma & { remove: (id: string) => Promise
 
     {props.tags.map(tag => <LemmaTag>{tag}</LemmaTag>)}
 
-    <DeleteButton onClick={props.remove(props._id)}>Delete</DeleteButton>
+    <DeleteButton onClick={props.remove(props._id)}>Delete Lemma</DeleteButton>
   </Article>
 )
 
