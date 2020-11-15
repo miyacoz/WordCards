@@ -21,7 +21,7 @@ enum HttpMethod {
 }
 
 export default class HttpRequest {
-  private q = (method: HttpMethod, path: string, data: object = {}): object | null =>
+  private q = (method: HttpMethod, path: string, data: object = {}): Promise<object | boolean | null> =>
     fetch(
       getApiBaseUrl() + path,
       {
