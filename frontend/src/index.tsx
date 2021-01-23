@@ -6,6 +6,7 @@ import { capitalise } from './helpers'
 import HttpRequest from './HttpRequest'
 import { ILemma } from './typings'
 import French from './French'
+import FrenchEdit from './French/Edit'
 
 const Main = styled.div`
   display: flex;
@@ -72,11 +73,11 @@ const StyledInput = styled.input`
 `
 
 interface ISearchLemmaProps {
-  onKeyUp: Function
+  onChange: Function
 }
 
-const SearchLemma: React.FC<ISearchLemmaProps> = ({ onKeyUp }) => (
-  <StyledInput onKeyUp={onKeyUp} placeholder='Search Lemma...' />
+const SearchLemma: React.FC<ISearchLemmaProps> = ({ onChange }) => (
+  <StyledInput onChange={onChange} placeholder='Search Lemma...' />
 )
 
 const App: React.FC = () => {
@@ -91,7 +92,7 @@ const App: React.FC = () => {
     const readAll = async () => {
       setIsTransfering(true)
 
-      const r: ILemma[] = await new HttpRequest().read('/readAll')
+      const r = await new HttpRequest().read('/readAll') as ILemma[]
 
       setIsTransfering(false)
       setData(r)
@@ -103,7 +104,7 @@ const App: React.FC = () => {
   const create = async () => {
     setIsTransfering(true)
 
-    const r: ILemma = await new HttpRequest().create('/create', {
+    const r = await new HttpRequest().create('/create', {
       lang: 'fr',
       lemma: 'vraiment',
       words: [
@@ -121,7 +122,7 @@ const App: React.FC = () => {
         },
       ],
       tags: [],
-    })
+    }) as ILemma
 
     setIsTransfering(false)
     setData(prevData => [...prevData, r])
@@ -130,11 +131,17 @@ const App: React.FC = () => {
   const remove = (id: string) => async () => {
     setIsTransfering(true)
 
-    const r: boolean = await new HttpRequest().delete(`/delete/${id}`)
+    const r = await new HttpRequest().delete(`/delete/${id}`) as boolean
 
     setIsTransfering(false)
     r && setData(prevData => prevData.filter(lemma => lemma._id !== id))
     setCurrentLemmaView(null)
+  }
+
+  const save = (data: ILemma) => async () => {
+    setIsTransfering(true)
+    console.log(data)
+    setIsTransfering(false)
   }
 
   const handleClickLemma = (id: string) => () => {
@@ -147,7 +154,7 @@ const App: React.FC = () => {
     }
   }
 
-  const handleSearch = (event: KeyboardEvent<HTMLInputElement>) => {
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.trim()
     if (query.length) {
       setIsFiltering(true)
@@ -158,7 +165,16 @@ const App: React.FC = () => {
     }
   }
 
-  console.log(filteredData, isFiltering)
+  const handleLemmaEdit = (id: string) => () => {
+    const foundLemma = data.find(lemma => lemma._id === id)
+    if (foundLemma) {
+      setCurrentLemmaEdit(foundLemma)
+    } else {
+      // TODO display error
+      console.warn(`lemma at id:${id} not found`)
+    }
+  }
+
   const displayData = isFiltering ? filteredData : data
 
   return (
@@ -168,7 +184,7 @@ const App: React.FC = () => {
 
       <Main>
         <LemmaListWrapper>
-          <SearchLemma onKeyUp={handleSearch} />
+          <SearchLemma onChange={handleSearch} />
 
           <LemmaList>
             {displayData.length ? (
@@ -185,7 +201,12 @@ const App: React.FC = () => {
 
         <LemmaView>
           {currentLemmaView ? (
-            <French.Lemma key={currentLemmaView._id} {...currentLemmaView} remove={remove} />
+            <French.Lemma
+              key={currentLemmaView._id}
+              {...currentLemmaView}
+              remove={remove}
+              edit={handleLemmaEdit}
+            />
           ) : (
             <div>&lt;--- select a lemma!</div>
           )}
@@ -193,7 +214,12 @@ const App: React.FC = () => {
 
         <LemmaEdit>
           {currentLemmaEdit ? (
-            <French.Lemma key={currentLemmaEdit._id} {...currentLemmaEdit} remove={remove} />
+            <FrenchEdit.Lemma
+              key={currentLemmaEdit._id}
+              {...currentLemmaEdit}
+              remove={remove}
+              save={save}
+            />
           ) : (
             <div>Waiting for edit</div>
           )}
