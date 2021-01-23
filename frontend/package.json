@@ -6,7 +6,8 @@
     "build": "parcel build ./src/index.htm",
     "typecheck": "tsc --noEmit --jsx react --esModuleInterop --project ./",
     "typecheck:watch": "tsc --watch --noEmit --jsx react --esModuleInterop --project ./",
-    "ship": "run-p build typecheck"
+    "ship": "run-p build typecheck",
+    "lint": "prettier ./src -w --no-semi --single-quote --trailing-comma all"
   },
   "devDependencies": {
     "@types/node": "^14.11.10",
