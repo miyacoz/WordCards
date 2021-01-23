@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit --jsx react --esModuleInterop --project ./",
     "typecheck:watch": "tsc --watch --noEmit --jsx react --esModuleInterop --project ./",
     "ship": "run-p build typecheck",
-    "lint": "prettier ./src -w --no-semi --single-quote --trailing-comma all"
+    "lint": "prettier ./src -w --no-semi --single-quote --trailing-comma all --arrow-parens avoid"
   },
   "devDependencies": {
     "@types/node": "^14.11.10",
