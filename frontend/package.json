@@ -2,7 +2,7 @@
   "name": "wordcards",
   "scripts": {
     "fe": "run-p serve typecheck:watch",
-    "serve": "parcel serve ./src/index.htm",
+    "serve": "parcel serve ./src/index.htm --port 23381",
     "build": "parcel build ./src/index.htm",
     "typecheck": "tsc --noEmit --jsx react --esModuleInterop --project ./",
     "typecheck:watch": "tsc --watch --noEmit --jsx react --esModuleInterop --project ./",
