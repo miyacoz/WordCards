@@ -1,9 +1,5 @@
 import { DotenvParseOutput } from 'dotenv'
-import {
-  MongoClient,
-  Db as MongoDb,
-  ObjectID,
-} from 'mongodb'
+import { MongoClient, Db as MongoDb, ObjectID } from 'mongodb'
 import { omit } from 'lodash'
 
 import Config from './Config'
@@ -36,7 +32,9 @@ class DB {
 
   public constructor(config: Readonly<DotenvParseOutput>) {
     this.config = config
-    this.DB_URL = `mongodb://${config.MONGO_HOST || ''}:${config.MONGO_PORT || 0}/`
+    this.DB_URL = `mongodb://${config.MONGO_HOST || ''}:${
+      config.MONGO_PORT || 0
+    }/`
     this.connect()
   }
 
@@ -47,14 +45,19 @@ class DB {
         auth: {
           user: this.config.MONGO_USER || '',
           password: this.config.MONGO_PASS || '',
-        }
+        },
       })
 
       this.db = client.db(this.DB_NAME)
 
-      const collections: { name: string; type: string }[] = await this.db.listCollections({}, {
-        nameOnly: true,
-      }).toArray()
+      const collections: { name: string; type: string }[] = await this.db
+        .listCollections(
+          {},
+          {
+            nameOnly: true,
+          },
+        )
+        .toArray()
       const collectionNames: string[] = collections.map(v => v.name)
 
       if (!collectionNames.includes(this.COLLECTION_NAME)) {
@@ -103,7 +106,11 @@ class DB {
 
   public update = async (_id: string, data: object): Promise<Word> => {
     // TODO should wrap it with try-catch?
-    const r = await this.query()?.findOneAndUpdate({ _id: new ObjectID(_id) }, { $set: omit(data, '_id') }, { returnOriginal: false })
+    const r = await this.query()?.findOneAndUpdate(
+      { _id: new ObjectID(_id) },
+      { $set: omit(data, '_id') },
+      { returnOriginal: false },
+    )
     if (!r.ok) {
       throw new DBError(`"update" for _id: ${_id} failed`)
     }

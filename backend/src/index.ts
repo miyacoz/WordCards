@@ -8,7 +8,7 @@ import Routes from './Routes'
 
 const serverOptions: Https.ServerOptions = {
   key: Fs.readFileSync(Config.SSL_KEY || ''),
-  cert: Fs.readFileSync(Config.SSL_CERT || '')
+  cert: Fs.readFileSync(Config.SSL_CERT || ''),
 }
 
 const SERVER_PORT: number = Number(Config.SERVER_PORT) || 0
@@ -23,7 +23,10 @@ const headers: Http.OutgoingHttpHeaders = {
 
 const empty = Buffer.alloc(0)
 
-const requestHandler: Http.RequestListener = (q: Http.IncomingMessage, r: Http.ServerResponse): void => {
+const requestHandler: Http.RequestListener = (
+  q: Http.IncomingMessage,
+  r: Http.ServerResponse,
+): void => {
   const send = (code: number, data?: object): void => {
     const isDataEmpty = typeof data === 'undefined'
     r.writeHead(code, headers)
@@ -32,7 +35,9 @@ const requestHandler: Http.RequestListener = (q: Http.IncomingMessage, r: Http.S
   }
 
   const pathAndParams = q.url?.split('?')
-  const paths = (pathAndParams || [])[0].split('/').filter(v => v && v !== API_PREFIX)
+  const paths = (pathAndParams || [])[0]
+    .split('/')
+    .filter(v => v && v !== API_PREFIX)
   const verb = paths.shift()
   const params = paths
   const method = q.method?.toLowerCase()
@@ -44,20 +49,27 @@ const requestHandler: Http.RequestListener = (q: Http.IncomingMessage, r: Http.S
   const route = async (
     routeMethod: HttpMethod,
     routeVerb: string,
-    routeAction: ({ params, data }: { params: string[]; data: object }) => Promise<any>,
+    routeAction: ({
+      params,
+      data,
+    }: {
+      params: string[]
+      data: object
+    }) => Promise<any>,
     parsedData: object = {},
   ): Promise<any> => {
     if (method === routeMethod && verb === routeVerb) {
       try {
         const result = await routeAction({ params, data: parsedData })
 
-        const code = typeof result === 'undefined'
-          ? 204
-          : routeMethod === HttpMethod.PUT
-          ? 201
-          : 200
+        const code =
+          typeof result === 'undefined'
+            ? 204
+            : routeMethod === HttpMethod.PUT
+            ? 201
+            : 200
 
-        send(code , result)
+        send(code, result)
       } catch (e) {
         console.warn('data process failed', e)
         // TODO return error 4xx/5xx
@@ -66,36 +78,36 @@ const requestHandler: Http.RequestListener = (q: Http.IncomingMessage, r: Http.S
     }
   }
 
-  const chunks: Array<string | Buffer | null> = [];
+  const chunks: Array<string | Buffer | null> = []
 
-  q
-    .on('data', chunk => chunks.push(chunk))
-    .on('end', () => {
-      if ([String(HttpMethod.GET), String(HttpMethod.DELETE)].includes(method)) {
+  q.on('data', chunk => chunks.push(chunk)).on('end', () => {
+    if ([String(HttpMethod.GET), String(HttpMethod.DELETE)].includes(method)) {
+      try {
+        Routes(route)
+      } catch (e) {
+        // TODO return 4xx/5xx
+        console.warn('process failed', e)
+      }
+    } else if (
+      [String(HttpMethod.POST), String(HttpMethod.PUT)].includes(method)
+    ) {
+      try {
+        const data = JSON.parse(chunks.join(''))
+
         try {
-          Routes(route)
+          Routes(route, data)
         } catch (e) {
           // TODO return 4xx/5xx
           console.warn('process failed', e)
         }
-      } else if ([String(HttpMethod.POST), String(HttpMethod.PUT)].includes(method)) {
-        try {
-          const data = JSON.parse(chunks.join(''))
-
-          try {
-            Routes(route, data)
-          } catch (e) {
-            // TODO return 4xx/5xx
-            console.warn('process failed', e)
-          }
-        } catch (e) {
-          // TODO return 4xx/5xx
-          console.warn('request data parse failed', e)
-        }
-      } else {
-        send(204)
+      } catch (e) {
+        // TODO return 4xx/5xx
+        console.warn('request data parse failed', e)
       }
-    })
+    } else {
+      send(204)
+    }
+  })
 }
 
 Https.createServer(serverOptions, requestHandler).listen(SERVER_PORT)
