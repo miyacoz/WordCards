@@ -4,6 +4,7 @@ import {
   Db as MongoDb,
   ObjectID,
 } from 'mongodb'
+import { omit } from 'lodash'
 
 import Config from './Config'
 import Word from './Word'
@@ -102,7 +103,7 @@ class DB {
 
   public update = async (_id: string, data: object): Promise<Word> => {
     // TODO should wrap it with try-catch?
-    const r = await this.query()?.findOneAndUpdate({ _id: new ObjectID(_id) }, data, { returnOriginal: false })
+    const r = await this.query()?.findOneAndUpdate({ _id: new ObjectID(_id) }, { $set: omit(data, '_id') }, { returnOriginal: false })
     if (!r.ok) {
       throw new DBError(`"update" for _id: ${_id} failed`)
     }
