@@ -9,7 +9,7 @@ interface IProps {
   handleSearch: (event: React.ChangeEvent<HTMLInputElement>) => void
   handleSearchKeyUp: (event: React.KeyboardEvent<HTMLInputElement>) => void
   handleSearchKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void
-  handleClickLemma: (id: string) => void
+  handleClickLemma: (index: number) => (id: string) => void
   data: ILemma[]
   isTransfering: boolean
   searchCursorAt: number
@@ -42,7 +42,7 @@ const ListView: React.FC<IProps> = ({
             <Lemma
               key={lemma._id}
               lemma={lemma}
-              onClick={handleClickLemma}
+              onClick={handleClickLemma(i)}
               active={searchCursorAt === i}
             />
           ))}

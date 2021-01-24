@@ -13,7 +13,10 @@ interface IProps extends IWord {
   setFormData: Function
 }
 
-const handleChange = (key: TextFieldKey, { index, setFormData }: Pick<IProps, 'index' | 'setFormData'>) => (
+const handleChange = (
+  key: TextFieldKey,
+  { index, setFormData }: Pick<IProps, 'index' | 'setFormData'>,
+) => (
   event: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>,
 ): void => {
   const t = event.target
@@ -24,15 +27,14 @@ const handleChange = (key: TextFieldKey, { index, setFormData }: Pick<IProps, 'i
   })
 }
 
-const WordEdit: React.FC<IProps> = ({
-  setFormData,
-  index,
-  ...word
-}) => (
+const WordEdit: React.FC<IProps> = ({ setFormData, index, ...word }) => (
   <dl>
     <dt>Class</dt>
     <dd>
-      <select value={word.class} onChange={handleChange('class', { index, setFormData })}>
+      <select
+        value={word.class}
+        onChange={handleChange('class', { index, setFormData })}
+      >
         {classes.map(classe => (
           <option key={classe} value={classe}>
             {capitalise(classe)}
@@ -59,7 +61,10 @@ const WordEdit: React.FC<IProps> = ({
 
     <dt>Memo</dt>
     <dd>
-      <TextField onChange={handleChange('memo', { index, setFormData })} defaultValue={word.memo} />
+      <TextField
+        onChange={handleChange('memo', { index, setFormData })}
+        defaultValue={word.memo}
+      />
     </dd>
   </dl>
 )

@@ -66,7 +66,9 @@ export const handleUpdate = (transfering: Ttransfering) => (
 export const handleClickLemma = (
   lemmata: IState['lemmata'],
   dispatch: Dispatch<IAction>,
-) => (id: string) => (): void => {
+) => (index: number) => (id: string) => (): void => {
+  dispatch({ type: ACTIONS.SET_SEARCH_CURSOR_AT, payload: index })
+
   const foundLemma = lemmata.find(({ _id }) => _id === id)
 
   if (foundLemma) {

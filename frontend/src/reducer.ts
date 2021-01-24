@@ -12,6 +12,7 @@ export enum ACTIONS {
   LEMMA_DELETED = 'LEMMA_DELETED',
   SEARCH_CURSOR_MOVED_UP = 'SEARCH_CURSOR_MOVED_UP',
   SEARCH_CURSOR_MOVED_DOWN = 'SEARCH_CURSOR_MOVED_DOWN',
+  SET_SEARCH_CURSOR_AT = 'SET_SEARCH_CURSOR_AT',
 }
 
 export interface IAction {
@@ -41,7 +42,8 @@ export const initialState: IState = {
   searchCursorAt: 0,
 }
 
-const isString = (x: IAction['payload']): x is string => `${x}` === x
+const isNumber = (x: IAction['payload']): x is number => typeof x === 'number'
+const isString = (x: IAction['payload']): x is string => typeof x === 'string'
 const isLemma = (x: IAction['payload']): x is ILemma =>
   'lemma' in x && !('length' in x)
 const isLemmata = (x: IAction['payload']): x is ILemma[] =>
@@ -93,7 +95,11 @@ export const reducer = (state: IState, action: IAction): IState => {
     case ACTIONS.SEARCH_CURSOR_MOVED_DOWN:
       return { ...state, searchCursorAt: calculateNewSearchCursorAt(state, 1) }
     default:
-      if (isString(payload)) {
+      if (isNumber(payload)) {
+        if (type === ACTIONS.SET_SEARCH_CURSOR_AT) {
+          return { ...state, searchCursorAt: payload }
+        }
+      } else if (isString(payload)) {
         if (type === ACTIONS.FILTERING) {
           return {
             ...state,
