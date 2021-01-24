@@ -2,7 +2,7 @@ import * as React from 'react'
 import MD from 'react-markdown'
 import Gfm from 'remark-gfm'
 
-import { IWord } from './typings'
+import { IWord } from '/typings'
 
 const Word: React.FC<IWord> = ({ class: classe, meanings, examples, memo }) => (
   <dl>
