@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { Article, Language, TheLemma, Tag, EditButton } from './styled'
+import { Article, Id, Language, TheLemma, Tag, EditButton } from './styled'
 import { IFrenchLemma } from '/typings'
 import Word from '/Word'
 import Adverb from '/French/Adverb'
@@ -12,6 +12,7 @@ interface IProps extends IFrenchLemma {
 
 const Lemma: React.FC<IProps> = ({ lemma, words, tags, _id, handleEdit }) => (
   <Article>
+    <Id>ID: {_id}</Id>
     <Language>French</Language>
     <TheLemma>{lemma}</TheLemma>
 

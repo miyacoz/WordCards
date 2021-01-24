@@ -6,6 +6,10 @@ export const Article = styled.div`
   padding: 1rem;
 `
 
+export const Id = styled.div`
+  color: #ccc;
+`
+
 export const Language = styled.div`
   font-style: oblique;
 `

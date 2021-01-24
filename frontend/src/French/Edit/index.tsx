@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 import {
   Article,
+  Id,
   Language,
   TheLemma,
   Tag,
@@ -33,6 +34,7 @@ const Lemma: React.FC<IProps> = ({ handleDelete, handleUpdate, ...lemma }) => {
     return (
       <Article>
         <DeleteButton onClick={handleDelete(_id)}>Delete Lemma</DeleteButton>
+        <Id>ID: {_id}</Id>
         <Language>French</Language>
         <TheLemma>{theLemma}</TheLemma>
 
