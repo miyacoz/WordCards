@@ -4,7 +4,6 @@ import * as ReactDOM from 'react-dom'
 import { Main } from './styled'
 import { ILemma } from '/typings'
 import {
-  initialState,
   handleCreate,
   handleClickLemma,
   handleSearch,
@@ -12,11 +11,9 @@ import {
   handleEdit,
   handleDelete,
   handleUpdate,
-  reducer,
   transfering,
-  ACTIONS,
-  IAction,
 } from './logic'
+import { initialState, reducer, ACTIONS, IAction } from './reducer'
 import HttpRequest from '/HttpRequest'
 import DetailView from '/DetailView'
 import EditView from '/EditView'

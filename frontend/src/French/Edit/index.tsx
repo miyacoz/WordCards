@@ -18,11 +18,7 @@ interface IProps extends IFrenchLemma {
   handleUpdate: (data: ILemma) => () => Promise<void>
 }
 
-const Lemma: React.FC<IProps> = ({
-  handleDelete,
-  handleUpdate,
-  ...lemma
-}) => {
+const Lemma: React.FC<IProps> = ({ handleDelete, handleUpdate, ...lemma }) => {
   const [formData, setFormData] = useState(null)
 
   useEffect(() => {
@@ -44,12 +40,7 @@ const Lemma: React.FC<IProps> = ({
           switch (word.class) {
             case 'adverb':
               return (
-                <Adverb
-                  key={i}
-                  index={i}
-                  {...word}
-                  setFormData={setFormData}
-                />
+                <Adverb key={i} index={i} {...word} setFormData={setFormData} />
               )
             case 'interjection':
               return (
