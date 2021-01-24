@@ -7,7 +7,8 @@ import {
   handleCreate,
   handleClickLemma,
   handleSearch,
-  handleSearchEnter,
+  handleSearchKeyUp,
+  handleSearchKeyDown,
   handleEdit,
   handleDelete,
   handleUpdate,
@@ -28,6 +29,7 @@ const App: React.FC = () => {
       filteredLemmata,
       currentLemmaDetail,
       currentLemmaEdit,
+      searchCursorAt,
     },
     dispatch,
   ] = useReducer(reducer, initialState)
@@ -55,13 +57,15 @@ const App: React.FC = () => {
       <Main>
         <ListView
           handleSearch={handleSearch(lemmata, dispatch)}
-          handleSearchEnter={handleSearchEnter(
-            { lemmata, filteredLemmata, isFiltering },
+          handleSearchKeyUp={handleSearchKeyUp(
+            { lemmata, filteredLemmata, isFiltering, searchCursorAt },
             dispatch,
           )}
+          handleSearchKeyDown={handleSearchKeyDown(dispatch)}
           handleClickLemma={handleClickLemma(lemmata, dispatch)}
           data={isFiltering ? filteredLemmata : lemmata}
           isTransfering={isTransfering}
+          searchCursorAt={searchCursorAt}
         />
 
         <DetailView

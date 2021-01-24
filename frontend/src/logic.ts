@@ -90,25 +90,49 @@ export const handleSearch = (
   }
 }
 
-export const handleSearchEnter = (
+export const handleSearchKeyUp = (
   {
     lemmata,
     filteredLemmata,
     isFiltering,
-  }: Pick<IState, 'lemmata' | 'filteredLemmata' | 'isFiltering'>,
+    searchCursorAt,
+  }: Pick<
+    IState,
+    'lemmata' | 'filteredLemmata' | 'isFiltering' | 'searchCursorAt'
+  >,
   dispatch: Dispatch<IAction>,
 ) => (event: React.KeyboardEvent<HTMLInputElement>): void => {
   const { key } = event
 
-  if (key.toLowerCase() === 'enter') {
-    if (filteredLemmata.length) {
-      dispatch({
-        type: ACTIONS.SET_CURRENT_LEMMA_DETAIL,
-        payload: filteredLemmata[0],
-      })
-    } else if (!isFiltering && lemmata.length) {
-      dispatch({ type: ACTIONS.SET_CURRENT_LEMMA_DETAIL, payload: lemmata[0] })
-    }
+  switch (key.toLowerCase()) {
+    case 'enter':
+      if (filteredLemmata.length) {
+        dispatch({
+          type: ACTIONS.SET_CURRENT_LEMMA_DETAIL,
+          payload: filteredLemmata[searchCursorAt],
+        })
+      } else if (!isFiltering && lemmata.length) {
+        dispatch({
+          type: ACTIONS.SET_CURRENT_LEMMA_DETAIL,
+          payload: lemmata[searchCursorAt],
+        })
+      }
+      break
+  }
+}
+
+export const handleSearchKeyDown = (dispatch: Dispatch<IAction>) => (
+  event: React.KeyboardEvent<HTMLInputElement>,
+): void => {
+  const { key } = event
+
+  switch (key.toLowerCase()) {
+    case 'arrowup':
+      dispatch({ type: ACTIONS.SEARCH_CURSOR_MOVED_UP })
+      break
+    case 'arrowdown':
+      dispatch({ type: ACTIONS.SEARCH_CURSOR_MOVED_DOWN })
+      break
   }
 }
 

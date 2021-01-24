@@ -10,6 +10,13 @@ export enum ACTIONS {
   SET_CURRENT_LEMMA_DETAIL = 'SET_CURRENT_LEMMA_DETAIL',
   SET_CURRENT_LEMMA_EDIT = 'SET_CURRENT_LEMMA_EDIT',
   LEMMA_DELETED = 'LEMMA_DELETED',
+  SEARCH_CURSOR_MOVED_UP = 'SEARCH_CURSOR_MOVED_UP',
+  SEARCH_CURSOR_MOVED_DOWN = 'SEARCH_CURSOR_MOVED_DOWN',
+}
+
+export interface IAction {
+  type: ACTIONS
+  payload?: any
 }
 
 export interface IState {
@@ -20,11 +27,7 @@ export interface IState {
   filteringQuery: string
   currentLemmaDetail: ILemma | null
   currentLemmaEdit: ILemma | null
-}
-
-export interface IAction {
-  type: ACTIONS
-  payload?: any
+  searchCursorAt: number
 }
 
 export const initialState: IState = {
@@ -35,6 +38,7 @@ export const initialState: IState = {
   filteringQuery: '',
   currentLemmaDetail: null,
   currentLemmaEdit: null,
+  searchCursorAt: 0,
 }
 
 const isString = (x: IAction['payload']): x is string => `${x}` === x
@@ -47,8 +51,29 @@ const isLemmata = (x: IAction['payload']): x is ILemma[] =>
 const filterLemmata = (lemmata: ILemma[], query: string) =>
   lemmata.filter(({ lemma }) => new RegExp(query, 'gi').test(lemma))
 
+const calculateNewSearchCursorAt = (state: IState, delta: number): number => {
+  const { searchCursorAt, isFiltering, lemmata, filteredLemmata } = state
+  let newSearchCursorAt = searchCursorAt + delta
+  const l = isFiltering ? filteredLemmata : lemmata
+
+  if (newSearchCursorAt < 0) {
+    return l.length - 1
+  } else if (newSearchCursorAt >= l.length) {
+    return 0
+  }
+
+  return newSearchCursorAt
+}
+
 export const reducer = (state: IState, action: IAction): IState => {
   const { type, payload } = action
+  const {
+    isFiltering,
+    lemmata,
+    filteredLemmata,
+    filteringQuery,
+    searchCursorAt,
+  } = state
 
   switch (type) {
     case ACTIONS.TRANSFERING:
@@ -61,15 +86,21 @@ export const reducer = (state: IState, action: IAction): IState => {
         isFiltering: false,
         filteredLemmata: [],
         filteringQuery: '',
+        searchCursorAt: 0,
       }
+    case ACTIONS.SEARCH_CURSOR_MOVED_UP:
+      return { ...state, searchCursorAt: calculateNewSearchCursorAt(state, -1) }
+    case ACTIONS.SEARCH_CURSOR_MOVED_DOWN:
+      return { ...state, searchCursorAt: calculateNewSearchCursorAt(state, 1) }
     default:
       if (isString(payload)) {
         if (type === ACTIONS.FILTERING) {
           return {
             ...state,
             isFiltering: true,
-            filteredLemmata: filterLemmata(state.lemmata, payload),
+            filteredLemmata: filterLemmata(lemmata, payload),
             filteringQuery: payload,
+            searchCursorAt: 0,
           }
         }
       } else if (isLemmata(payload)) {
@@ -81,7 +112,7 @@ export const reducer = (state: IState, action: IAction): IState => {
           return {
             ...state,
             lemmata: payload,
-            filteredLemmata: filterLemmata(payload, state.filteringQuery),
+            filteredLemmata: filterLemmata(payload, filteringQuery),
             currentLemmaDetail: null,
             currentLemmaEdit: null,
           }
